@@ -9,6 +9,19 @@
 /**	color: @clear_dark; **/
 }
 
+scrolledwindow {
+	border: none;
+}
+
+scrollbar {
+	background: none;
+	border: none;
+}
+
+#LigthsCharacteristicsBox {
+	background-color: @dark;
+}
+
 label {
 	background: none;
 	color: #aaaaaa;
@@ -16,6 +29,16 @@ label {
 	font-family: sans;
 	font-size: 11px;
 	padding: 2px;
+}
+
+#LigthsCharacteristicsBox label {
+	background-color: @bg_color;
+}
+
+#LigthsCharacteristicsBoxChild label {
+	border-radius: 2px;
+	margin: 2px;
+	padding-left: 2px;
 }
 
 button {
@@ -30,6 +53,27 @@ button {
 	margin-right: 1px;
 }
 
+
+#LigthsCharacteristicsBoxChild button {
+	background: none;
+	background-color: @dark;
+	border: 0px solid #ddeeff;
+	color: #aaaaaa;
+	border-radius: 0px;
+	font-family: sans;
+	font-size: 10px;
+	margin-top: 1px;
+	margin-right: 1px;
+}
+
+#LigthsCharacteristicsBoxChild button:hover {
+	background: none;
+	background-color: @darker;
+}
+
+
+
+
 button:hover {
 	background-color: #2a2a2a;
 	
@@ -40,6 +84,10 @@ button:active {
 
 }
 
+buttonbox {
+	border: 1px solid @bg_color;
+	border-radius: 5px;
+}
 
 
 menu {
@@ -63,7 +111,7 @@ paned separator {
 	background-size: 0px;
 }
 
-#ListBox {
+#ListBox, #LigthsListBox {
 	background-color: @dark;
 }
 
@@ -71,7 +119,7 @@ spinbutton {
 	background: none;
 	color: @clear_dark;
 	font-family: sans;
-	font-size: 12px;
+	font-size: 10px;
 }
 
 spinbutton:active {

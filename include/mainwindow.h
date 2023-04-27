@@ -4,6 +4,9 @@
 #include "drawingareas.h"
 #include "scene_handler.h"
 
+enum TOOLBOX {TILES, LIGTHS, OBJECTS};
+enum LIGTHS_OPTIONS {TYPE, POSITIONS, DIRECTION, AMBIENT, SPECULAR, FRUSTRUM, STRENGTH, ATTENUATION};
+
 class MainWindow : public Gtk::Window
 {
 public:
@@ -26,6 +29,7 @@ public:
 	
 	void setMenu();
 	void configureButtons();
+	void configureLigthsOptions();
 	
 	void loadScene();
 	void saveScene();
@@ -42,6 +46,14 @@ public:
 	void rotar_objeto();
 	void mover_objeto();
 	void set_rejilla();
+	
+	void show_hide_toolspane(TOOLBOX tooltype);
+	void hide_ligths_characteristics(Gtk::Container *bbox, Gtk::Button *button);
+	
+	
+	void add_ligth();
+	void select_ligth();
+	void alter_ligth(LIGTHS_OPTIONS l_opt, int index);
 	
 };
 

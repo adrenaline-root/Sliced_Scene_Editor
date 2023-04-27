@@ -1,4 +1,4 @@
-#include "drawingareas.h"
+#include "../include/drawingareas.h"
 
 
 #define PI 3.14159265358979323846
@@ -42,6 +42,7 @@ glDrawingArea::~glDrawingArea()
 bool glDrawingArea::on_my_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
 	glClearColor(0.2, 0.2, 0.2, 1.0);
+	//glClearColor(0., 0., 0., 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	
 	if (attached == true)
@@ -64,17 +65,18 @@ bool glDrawingArea::on_my_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 		//glOrtho( -orto / 2, orto / 2, -ortov / 2 / z_aspect_correction, ortov / 2 / z_aspect_correction, -ortov / 2, ortov / 2);
 		
 		// Perspectiva normal: (estrechamiento del eje z -profundidad-);
-		glOrtho( -orto / 2, orto / 2, -ortov / 2 , ortov / 2, -ortov / 2, ortov / 2);
-		//glOrtho(0.0, orto, 0.0, ortov, -1.0, ortov);
+		glOrtho( -orto / 2, orto / 2, -ortov / 2 , ortov / 2, -ortov * 2, ortov * 2);
+		//glOrtho(0.0, orto, 0.0, ortov, -ortov, ortov);
 		
 		glRotatef(45.0, 1.0, 0.0, 0.0);
 		glRotatef(rotation, 0.0, 1.0, 0.0);
 		//float x_aspect_correction = 1.0 / std::cos(45 * PI / 180);
 		glScalef(scale, scale, scale);
-		glScalef(1.0, z_aspect_correction, 1.0);
+		//glScalef(1.0, z_aspect_correction, 1.0);
 		
 				
 		glTranslatef(tranlation_x, 0.0, tranlation_y);
+		glActiveTexture(GL_TEXTURE0);
 		
 
 		glMatrixMode(GL_MODELVIEW);
@@ -85,86 +87,83 @@ bool glDrawingArea::on_my_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 		//glLineWidth(2.0);
 		Draw_ejes();
 		
+		glColor4f(1.0, 1.0, 1.0, 1.0);
 		
-		glColor3f(1.0, 1.0, 1.0);
-		
+		auto start = std::chrono::system_clock::now();
 		if (int(scene_handler->sliced_objects.size()) > 0) {
 			
-			// Renderizando la escena con el basic shader
-			
-			scene_handler->shader_handler.use_program();
-			
-			int gen_textures_size = scene_handler->texture_handler.generated_textures.size();
-			GLuint texture = scene_handler->texture_handler.generated_textures[gen_textures_size - 1];
-			
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, texture);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			
-			scene_handler->shader_handler.set_viewport_matrix({int(orto), int(ortov), int(ortov)});
-			scene_handler->shader_handler.set_mat4("viewport_matrix", scene_handler->shader_handler.viewport_matrix);
-			
-			scene_handler->shader_handler.set_rotation_matrix(rotation);
-			scene_handler->shader_handler.set_mat4("rotation_matrix", scene_handler->shader_handler.rotation_matrix);
-			
-			scene_handler->shader_handler.set_view_rotation_matrix(45);
-			scene_handler->shader_handler.set_mat4("view_rotation_matrix", scene_handler->shader_handler.view_rotation_matrix);
-			
-			scene_handler->shader_handler.set_trans_scale_matrix(scale, {tranlation_x, tranlation_y});
-			scene_handler->shader_handler.set_mat4("trans_scale_matrix", scene_handler->shader_handler.trans_scale_matrix);
-			
-			scene_handler->shader_handler.set_sampler("c_texture", 0);
-			scene_handler->shader_handler.set_sampler("n_texture", 1);
-			
-			
-			
-			float cos90 = float(cos(double(90) * PI / double(180)));
-			float sin90 = float(sin(double(90) * PI / double(180)));
-			
-			GLfloat rot_norm90[] = {cos90, 0, sin90, 0, // rotación eje y
-									0, 1, 0, 0, 
-									-sin90, 0, cos90, 0,
-									0, 0, 0, 1};
-									
-			float cos180 = float(cos(double(180) * PI / double(180)));
-			float sin180 = float(sin(double(180) * PI / double(180)));
-			
-			GLfloat rot_norm180[] = {cos180, 0, sin180, 0, // rotación eje y
-									0, 1, 0, 0, 
-									-sin180, 0, cos180, 0,
-									0, 0, 0, 1};
-									
-			float cos270 = float(cos(double(270) * PI / double(180)));
-			float sin270 = float(sin(double(270) * PI / double(180)));
-			
-			GLfloat rot_norm270[] = {cos270, 0, sin270, 0, // rotación eje y
-									0, 1, 0, 0, 
-									-sin270, 0, cos270, 0,
-									0, 0, 0, 1};
-			
-			GLint mat_rot90_loc = glGetUniformLocation(scene_handler->shader_handler.program, "mat_rot90");
-			GLint mat_rot180_loc = glGetUniformLocation(scene_handler->shader_handler.program, "mat_rot180");
-			GLint mat_rot270_loc = glGetUniformLocation(scene_handler->shader_handler.program, "mat_rot270");
-			
-			glUniformMatrix4fv(mat_rot90_loc, 1, GL_FALSE, rot_norm90);
-	        glUniformMatrix4fv(mat_rot180_loc, 1, GL_FALSE, rot_norm180);
-			glUniformMatrix4fv(mat_rot270_loc, 1, GL_FALSE, rot_norm270);
-			
+			if (scene_handler->ligths_on == false) {
+				scene_handler->ligths_handler.render_heigth_maps(scene_handler->standard_mesh, scene_handler->texture_handler.generated_textures[0]);
+				scene_handler->ligths_handler.render_tile_map();
+				scene_handler->ligths_on = true;
+			}
+			else {
+				if (scene_handler->ligths_handler.ligths.size() > 0) {
+					//Ligth *ligth = &scene_handler->ligths_handler.ligths[0];
+					//ligth->position = {mouse_pos.x, 50.0, mouse_pos.y};
+					
+					//glm::mat4 rot = glm::rotate(glm::mat4(1.0f), glm::radians(-rotation), glm::vec3(0.0, 1.0, 0.0));
+					//glm::vec4 light_dir = glm::vec4(1., 0.0, 0., 0.0);// * rot;
 
-			scene_handler->shader_handler.check_gl_errors();
-			
-			glDrawElements(GL_TRIANGLES, int(scene_handler->layered_mesh.index_pool.size()), GL_UNSIGNED_INT, nullptr);
-			
-			glDisable(GL_TEXTURE_2D);
+					//ligth->direction = {light_dir.x, light_dir.y, light_dir.z};
+					//ligth->render_oclusion_map(scene_handler->ligths_handler.tile_map, scene_handler->ligths_handler.heigth_map1, scene_handler->ligths_handler.heigth_map2, {gwa.width, gwa.height});
+					
+					//if (ligth->oclusion_map) scene_handler->render_compute_output(gwa.width, gwa.height);
+					scene_handler->render_scene_lt(gwa.width, gwa.height, tranlation_x, tranlation_y, scale, rotation);
+					scene_handler->compute_shadows(gwa.width, gwa.height);
+//					
+//					ligth = NULL;
+//					delete(ligth);
+					
+				}
+				else scene_handler->render_scene(gwa.width, gwa.height, tranlation_x, tranlation_y, scale, rotation);
 				
+			
+			}
+
+			//scene_handler->render_filtered_scene(gwa.width, gwa.height, tranlation_x, tranlation_y, scale, rotation);
+			//scene_handler->ray_cast(gwa.width, gwa.height, tranlation_x, tranlation_y, scale, rotation, mouse_pos);
+			//scene_handler->render_shadow_map(gwa.width, gwa.height, mouse_pos);
+			//scene_handler->render_grey_scale(gwa.width, gwa.height, tranlation_x, tranlation_y, scale, rotation, boxSelector.position);
+			//scene_handler->render_colored_and_grey_sceen(gwa.width, gwa.height, tranlation_x, tranlation_y, scale, rotation, mouse_pos);
 		}
 		
-		scene_handler->shader_handler.unuse_program();
+		glUseProgram(0);
 		
+		
+		auto end = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = end - start;
+		//std::cout << elapsed_seconds.count() << std::endl;
+		
+		
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		//glOrtho( -orto / 2, orto / 2, -ortov / 2 / z_aspect_correction, ortov / 2 / z_aspect_correction, -ortov / 2, ortov / 2);
+		glOrtho( -orto / 2, orto / 2, -ortov / 2 , ortov / 2, -ortov * 2, ortov * 2);
+		
+		glRotatef(45.0, 1.0, 0.0, 0.0);
+		glRotatef(rotation, 0.0, 1.0, 0.0);
+	
+		glScalef(scale, scale, scale);
+		glScalef(1.0, z_aspect_correction, 1.0);
+		
+		glTranslatef(tranlation_x, 0.0, tranlation_y);
+		
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glLineWidth(1.0);
+		
+		//glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
 		drawBoxSelector();
+		if (scene_handler->ligths_handler.ligths.size() > 0) {
+			drawLigth(scene_handler->ligths_handler.get_selected_ligth());
+		}
 		
+		//scene_handler->render_shadow_map(gwa.width, gwa.height, mouse_pos);
+		glFlush();
 		glXSwapBuffers(xdisplay, win);
+		
 
 	}
 
@@ -247,6 +246,10 @@ void glDrawingArea::readPixelsToPixbuff()
 
 bool glDrawingArea::on_event(GdkEvent *evento)
 {
+	if (evento->any.type == GDK_MOTION_NOTIFY) {
+		mouse_pos = {evento->motion.x, evento->motion.y};
+	}
+	
 	if (evento->any.type == GDK_BUTTON_PRESS) {
 		grab_focus();
 	}
@@ -256,6 +259,10 @@ bool glDrawingArea::on_event(GdkEvent *evento)
 			on_key_press_event(&evento->key);
 		}
 	}
+	
+	
+	queue_draw();
+	
 
 	return true;
 }
@@ -289,7 +296,7 @@ bool glDrawingArea::on_key_press_event(GdkEventKey *keyevent)
 				break;
 				
 			case GDK_KEY_Down:
-				scale -= scaleInc;
+				if (scale > 0.25) scale -= scaleInc;
 				break;
 		}
 	}
@@ -403,8 +410,12 @@ bool glDrawingArea::on_key_press_event(GdkEventKey *keyevent)
 			if (inst != NULL) {
 				inst->position = boxSelector.position;
 				scene_handler->add_slices_to_layered_mesh();
-				scene_handler->shader_handler.load_mesh_to_gl_buffers(scene_handler->layered_mesh);
+				//scene_handler->shader_handler.load_mesh_to_gl_buffers(scene_handler->layered_mesh);
+				
 			}
+			
+			inst = NULL;
+			delete(inst);
 				
 			
 		}
@@ -437,15 +448,16 @@ bool glDrawingArea::on_key_press_event(GdkEventKey *keyevent)
 				inst->rotation = inst->rotation % 4;
 				if (inst->rotation < 0) inst->rotation = 4 + inst->rotation;
 				scene_handler->add_slices_to_layered_mesh();
-				scene_handler->shader_handler.load_mesh_to_gl_buffers(scene_handler->layered_mesh);
+				//scene_handler->shader_handler.load_mesh_to_gl_buffers(scene_handler->layered_mesh);
 			}
 			
 			else scene_handler->action = NO_ACTION;
+			
+			inst = NULL;
+			delete(inst);
 		}
 	}
 	
-	
-	queue_draw();
 	
 	return true;
 }
@@ -488,6 +500,9 @@ void glDrawingArea::attach_xwindow()
 	glXMakeCurrent(xdisplay, win, glc);
 	
 	scene_handler->init_shaders();
+	scene_handler->ligths_handler.prepare_shaders();
+	
+	
 	
 }
 
@@ -538,34 +553,38 @@ void glDrawingArea::DrawPoints ()
 	}
 }
 
-void glDrawingArea::drawRejilla() {
+void glDrawingArea::drawRejilla()
+{
 	
-	int limRej[] = {-(rejillaSize * 20), rejillaSize * 20};
+	int limRejx[] = {boxSelector.position.x -(rejillaSize * 100), boxSelector.position.x + rejillaSize * 100};
+	int limRejy[] = {boxSelector.position.y -(rejillaSize * 100), boxSelector.position.y + rejillaSize * 100};
 	
 	glColor3f(0.3, 0.3, 0.3);
-	for (int x = limRej[0]; x <= limRej[1]; x += rejillaSize) {
-		if (x != limRej[0] && x != limRej[1]) {
+	int y = limRejy[0];
+	for (int x = limRejx[0]; x <= limRejx[1]; x += rejillaSize) {
+		if (x != limRejx[0] && x != limRejx[1]) {
 			glBegin(GL_LINES);
-				glVertex3f(x, 0, limRej[0]);
-				glVertex3f(x, 0, limRej[1]);
+				glVertex3f(x, 0, limRejy[0]);
+				glVertex3f(x, 0, limRejy[1]);
 			glEnd();
 			glBegin(GL_LINES);
-				glVertex3f(limRej[0], 0, x);
-				glVertex3f(limRej[1], 0, x);
+				glVertex3f(limRejx[0], 0, y);
+				glVertex3f(limRejx[1], 0, y);
 			glEnd();
 		}
+		y += rejillaSize;
 		
 	}
 }
 
-
-void glDrawingArea::drawBoxSelector() {
+void glDrawingArea::drawBoxSelector()
+{
 	
 	int indexes[] = {0, 1, 2, 2, 3, 0};
 	
 	// Dibuja una guía para saber la posicion del selector en la rejilla;
 	
-	glColor3f(.7, .4, .4);
+	glColor4f(.7, .4, .4, 1.);
 	
 	for (int x = 0; x < (int(sizeof(indexes) / sizeof(indexes[0])) / 3); x++) {
 		int index1 = indexes[x * 3] * 3;
@@ -580,7 +599,7 @@ void glDrawingArea::drawBoxSelector() {
 	
 	// Dibuja el selector;
 	
-	glColor3f(.9, .4, .3);
+	glColor4f(.9, .4, .3, 1.);
 	
 	for (int x = 0; x < int(boxSelector.indexPool.size()); x += 2) {
 		int index1 = boxSelector.indexPool[x] * 3;
@@ -591,6 +610,23 @@ void glDrawingArea::drawBoxSelector() {
 			glVertex3f(boxSelector.vertexPool[index2], boxSelector.vertexPool[index2 + 1], boxSelector.vertexPool[index2 + 2]);
 		glEnd();
 	}
+	
+	glColor4f(1., 1., 1., 1.);
+}
+
+void glDrawingArea::drawLigth(Ligth *ligth)
+{
+	glm::vec3 pos = glm::vec3(ligth->position.x, ligth->position.y, ligth->position.z);
+	glm::vec3 normalized_dir = glm::normalize(glm::vec3(ligth->direction.x, ligth->direction.y, ligth->direction.z));
+	glm::vec3 end = glm::vec3(normalized_dir.x, normalized_dir.y, normalized_dir.z);
+	
+	end = glm::vec3(pos.x + end.x * 64., pos.y + end.y * 64., pos.z + end.z * 64.);
+	glColor3f(1., 1., 1.);
+	glBegin(GL_LINES);
+		glVertex3f(pos.x, pos.y, pos.z);
+		glVertex3f(end.x, end.y, end.z);
+	glEnd();
+	
 }
 
 

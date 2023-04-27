@@ -33,21 +33,24 @@ struct slice {
 	};
 	
 	std::vector<vec3D> rotar(int rotation) {
-	
+		
+		std::vector<vec3D> return_geometry;
 		
 		if (rotation == 0) {
-			return geometry;
+			return_geometry = geometry;
 		} 
 		else if (rotation == 1) {
-			return {geometry[1], geometry[2], geometry[3], geometry[0]};
+			return_geometry = {geometry[1], geometry[2], geometry[3], geometry[0]};
 		}
 		else if (rotation == 2) {
-			return {geometry[2], geometry[3], geometry[0], geometry[1]};
+			return_geometry = {geometry[2], geometry[3], geometry[0], geometry[1]};
 		}
 		
 		else if (rotation == 3) {
-			return {geometry[3], geometry[0], geometry[1], geometry[2]};
+			return_geometry = {geometry[3], geometry[0], geometry[1], geometry[2]};
 		}
+		
+		return return_geometry;
 		
 	};
 	

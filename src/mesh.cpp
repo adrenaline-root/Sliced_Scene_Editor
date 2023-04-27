@@ -1,5 +1,5 @@
-#include "mesh.h"
-#include "ObjLoader.h"
+#include "../include/mesh.h"
+#include "../include/ObjLoader.h"
 
 //================================
 //=== METODOS DE LAYERED MESH ====
@@ -47,11 +47,41 @@ float* LayeredMesh::get_rotation_pool()
 	return rotation_pool_buff;
 }
 
+//================================
+//=== METODOS DE STANDARD MESH ===
+//================================
+
+StandardMesh::StandardMesh() 
+{
+	
+}
+
+StandardMesh::~StandardMesh() 
+{
+	
+}
+
+void StandardMesh::add_float_data(std::vector<float> data)
+{
+	float_buffer_data.push_back(data);
+	gl_float_data[float_buffer_data.size() - 1] = new float[data.size()];
+	std::copy(data.begin(), data.end(), gl_float_data[float_buffer_data.size() - 1]);
+	
+}
+
+void StandardMesh::add_int_data(std::vector<int> data)
+{
+	int_buffer_data.push_back(data);
+	gl_int_data[int_buffer_data.size() - 1] = new unsigned int[data.size()];
+	std::copy(data.begin(), data.end(), gl_int_data[int_buffer_data.size() - 1]);
+
+}
+
+
 
 //================================
 //=== METODOS DE MODEL ====
 //================================
-
 
 
 Model::Model()
@@ -84,6 +114,16 @@ void Model::createCube(float size)
 										size, size, 0.0f,
 										size, size, size,
 										0.0f, size, size};
+	
+	position.x = int(position.x / size) * size;
+	position.y = int(position.y / size) * size;
+	position.z = int(position.z / size) * size;
+	
+	for (int i = 0; i < int(vertexPool.size()); i += 3) {
+		vertexPool[i] += position.x;
+		vertexPool[i + 1] += position.z;
+		vertexPool[i + 2] += position.y;
+	}
 										
 //	std::cout << "";
 //	copy(vertexPool.begin(), vertexPool.end(), std::ostream_iterator<float>(std::cout, " "));

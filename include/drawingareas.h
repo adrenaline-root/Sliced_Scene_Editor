@@ -17,6 +17,7 @@ public:
 	GdkWindow *parent;
 	GdkDisplay *display;
 	GdkWindowAttr attributes;
+	vec2D mouse_pos;
 	
 	float* data = NULL;
 	Glib::RefPtr<Gdk::Pixbuf> bufferdata;
@@ -60,6 +61,7 @@ public:
 	void drawRejilla();
 	void DrawPoints();
 	void drawBoxSelector();
+	void drawLigth(Ligth *ligth);
 
 };
 

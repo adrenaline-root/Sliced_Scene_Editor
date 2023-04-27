@@ -14,6 +14,11 @@
 #include <epoxy/gl.h>
 
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <GL/gl.h>

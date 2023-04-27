@@ -1,4 +1,4 @@
-#include "sliced_object.h"
+#include "../include/sliced_object.h"
 
 
 Sliced_Object::Sliced_Object()

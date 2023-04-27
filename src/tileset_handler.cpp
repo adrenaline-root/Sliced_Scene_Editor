@@ -1,4 +1,4 @@
-#include "tileset_handler.h"
+#include "../include/tileset_handler.h"
 #include <regex>
 #include <cstdlib>
 #include "stdlib.h"
@@ -59,9 +59,16 @@ Sliced_Object tileset::get_selected_object()
 
 Sliced_Object tileset::get_object_by_name(std::string name) 
 {
+	Sliced_Object obj;
+	
 	for (Sliced_Object sobj : sliced_objects) {
-		if (sobj.name == name) return sobj;
+		if (sobj.name == name) {
+			obj = sobj;
+			break;
+		}
 	}
+	
+	return obj;
 }
 
 

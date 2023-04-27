@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "../include/mainwindow.h"
 #include <gtkmm/application.h>
 
 int main (int argc, char *argv[])
@@ -8,14 +8,19 @@ int main (int argc, char *argv[])
 
 	MainWindow *mainwindow = nullptr;
 	//MainWindow main;
-
-	auto builder = Gtk::Builder::create_from_file("index.glade");
-	builder->get_widget_derived("MainWindow", mainwindow);
+	
+	try {
+		auto builder = Gtk::Builder::create_from_file("source-files/styles/index.glade");
+		builder->get_widget_derived("MainWindow", mainwindow);
+	}
+	catch (const Glib::Error &e) {
+		std::cerr << e.what() << std::endl;
+	}
 
 	auto css = Gtk::CssProvider::create();
 
 	try {
-		css->load_from_path("styles.css");
+		css->load_from_path("source-files/styles/styles.css");
 
 	} catch (const Glib::Error &e) {
 		std::cout << e.what() << std::endl;

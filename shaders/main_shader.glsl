@@ -17,7 +17,7 @@ out vec4 Frag_pos;
 
 void main()
 { 
-	gl_Position = vPosition * trans_scale_matrix * rotation_matrix * view_rotation_matrix * viewport_matrix;
+	gl_Position = trans_scale_matrix * vPosition * rotation_matrix * view_rotation_matrix * viewport_matrix;
 	out_uvs = vTextCoords;
 	rot = vRotation;
 	Frag_pos = vPosition;
@@ -48,7 +48,7 @@ void main()
 	vec3 light_dir1 = normalize(spotligth_pos - vec3(Frag_pos.xyz));
 	vec3 ligth_color = vec3(.7, .7, .7);
 	
-	float distance = length(light_dir1);
+	float distance = length(light_dir);
 	float attenuation = 1.0 / (1.0 + 0.022 * distance + 0.0019 * (distance * distance));
 	
 	
@@ -85,17 +85,19 @@ void main()
 	}
 	
 	float diff = max(dot(normal_color.xyz, light_dir1), 0.0);
-	vec3 ambient = vec3(1., 1., .4) * .2;
+	vec3 ambient = vec3(1., .4, .4) * .9;
 	vec3 specular = vec3(.3);
+	//intensity = intensity * .9;
 	
 	vec3 diffuse;
-	attenuation = 1.0;
-	intensity = 1.0;
-		
-	diffuse = ((ambient * attenuation * intensity + diff * attenuation * intensity + specular * attenuation * intensity) * texture_color.xyz);
 	
+	//diffuse = ((ambient * attenuation * intensity + diff * attenuation * intensity + specular * attenuation * intensity) * (texture_color.xyz * .9) );
+	//diffuse = (ambient * diff) + (texture_color.xyz);
+	diffuse = (texture_color.xyz);
 	
 	Frag_Color = vec4(diffuse, texture_color.w);
+	//if (Frag_pos.y < 1.0) discard;
+	
 	
 	
 	

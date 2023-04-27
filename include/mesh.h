@@ -42,6 +42,22 @@ struct VertexFormat {
 		attributes.push_back(attr);
 		size += attr.size;
 	};
+	
+	int get_attribute_index(std::string attr_name) {
+		int index = -1;
+		for (int i = 0; i < int(attributes.size()); i++) {
+			if (attributes[i].name == attr_name) {
+				index = i;
+				break;
+			}
+		}
+		
+		if (index == -1) {
+			std::cerr << "No such attribute in VertexFormat" << std::endl;
+		}
+		
+		return index;
+	};
 };
 
 
@@ -61,6 +77,28 @@ public:
 	float* get_rotation_pool();
 	unsigned int* get_index_pool();
 	
+	
+};
+
+// 	PRUEBA NUEW TYPE MESH
+
+class StandardMesh {
+public:
+	VertexFormat vertex_format;
+	
+	// Aquí irán los atributos de vértice, ya sean position, uv_coords, translations etc ect;
+	// El orden de los buffers va según el orden de los atributos del vertex format;
+	std::vector<std::vector<float>> float_buffer_data; // Para los parámetros float;
+	std::vector<std::vector<int>> int_buffer_data; // Para los parámetros int;
+	
+	float* gl_float_data[10];
+	unsigned int* gl_int_data[10];
+
+	StandardMesh();
+	virtual ~StandardMesh();
+	
+	void add_float_data(std::vector<float> float_vector);
+	void add_int_data(std::vector<int> int_vector);
 	
 };
 
